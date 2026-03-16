@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when, datediff
+from pyspark.sql.functions import col, when
 import pytest
 
 @pytest.fixture(scope="session")
