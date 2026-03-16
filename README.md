@@ -28,8 +28,8 @@ The pipeline follows a three-stage medallion-style architecture:
 | olist_order_payments_dataset.csv | Payment transactions | 103,886 |
 | olist_customers_dataset.csv | Customer profiles | 99,441 |
 | olist_order_items_dataset.csv | Order line items | 112,650 |
-| olist_products_dataset.csv | Product catalogue | — |
-| olist_sellers_dataset.csv | Seller profiles | — |
+| olist_products_dataset.csv | Product catalogue | 32951 |
+| olist_sellers_dataset.csv | Seller profiles | 3095 |
 
 ---
 
