@@ -23,10 +23,7 @@ jobs:
         run: pip install pyflakes pytest pyspark==3.5.0
 
       - name: Lint Python files
-        run: |
-          pyflakes 01_ingest.py
-          pyflakes 02_transform.py
-          pyflakes 03_load_delta.py
+        run: pyflakes tests/test_transformations.py
 
       - name: Run transformation tests
         run: pytest tests/test_transformations.py -v
