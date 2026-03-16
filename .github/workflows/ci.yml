@@ -32,17 +32,3 @@ jobs:
       - name: Run transformation tests
         run: |
           pytest tests/test_transformations.py -v
-```
-
----
-
-### Step 3: Commit the file
-- Scroll down → click **"Commit new file"**
-
----
-
-### Step 4: Create the test file
-- Click **"Add file"** → **"Create new file"**
-- Filename:
-```
-tests/test_transformations.py
