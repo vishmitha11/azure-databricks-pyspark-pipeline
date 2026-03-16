@@ -1,57 +1,32 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when, datediff
-import pytest
+name: Data Pipeline CI
 
-@pytest.fixture(scope="session")
-def spark():
-    return SparkSession.builder \
-        .master("local") \
-        .appName("pipeline-tests") \
-        .getOrCreate()
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-def test_delivery_status_on_time(spark):
-    # Create sample data
-    data = [("order1", "2024-01-01", "2024-01-10", "2024-01-15")]
-    df = spark.createDataFrame(data, 
-        ["order_id", "purchase_date", "delivered_date", "estimated_date"])
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
 
-    # Apply transformation
-    df = df.withColumn("delivery_status",
-        when(col("delivered_date") <= col("estimated_date"), "ON TIME")
-        .when(col("delivered_date") > col("estimated_date"), "LATE")
-        .otherwise("PENDING"))
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    result = df.collect()[0]["delivery_status"]
-    assert result == "ON TIME"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-def test_delivery_status_late(spark):
-    data = [("order2", "2024-01-01", "2024-01-20", "2024-01-15")]
-    df = spark.createDataFrame(data,
-        ["order_id", "purchase_date", "delivered_date", "estimated_date"])
+      - name: Install dependencies
+        run: pip install pyflakes pytest pyspark==3.5.0
 
-    df = df.withColumn("delivery_status",
-        when(col("delivered_date") <= col("estimated_date"), "ON TIME")
-        .when(col("delivered_date") > col("estimated_date"), "LATE")
-        .otherwise("PENDING"))
+      - name: Lint Python files
+        run: |
+          pyflakes 01_ingest.py
+          pyflakes 02_transform.py
+          pyflakes 03_load_delta.py
 
-    result = df.collect()[0]["delivery_status"]
-    assert result == "LATE"
-
-def test_payment_category_low(spark):
-    data = [("order1", 50.0)]
-    df = spark.createDataFrame(data, ["order_id", "total_payment"])
-
-    df = df.withColumn("payment_category",
-        when(col("total_payment") < 100, "LOW")
-        .when(col("total_payment") < 500, "MEDIUM")
-        .otherwise("HIGH"))
-
-    result = df.collect()[0]["payment_category"]
-    assert result == "LOW"
-
-def test_no_negative_payments(spark):
-    data = [("order1", 50.0), ("order2", 200.0), ("order3", 600.0)]
-    df = spark.createDataFrame(data, ["order_id", "total_payment"])
-
-    negative_count = df.filter(col("total_payment") < 0).count()
-    assert negative_count == 0
+      - name: Run transformation tests
+        run: pytest tests/test_transformations.py -v
