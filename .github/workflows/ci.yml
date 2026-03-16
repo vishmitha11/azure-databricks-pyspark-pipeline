@@ -1,0 +1,48 @@
+name: Data Pipeline CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pyflakes pytest pyspark==3.5.0
+
+      - name: Lint Python files
+        run: |
+          pyflakes 01_ingest.py
+          pyflakes 02_transform.py
+          pyflakes 03_load_delta.py
+
+      - name: Run transformation tests
+        run: |
+          pytest tests/test_transformations.py -v
+```
+
+---
+
+### Step 3: Commit the file
+- Scroll down → click **"Commit new file"**
+
+---
+
+### Step 4: Create the test file
+- Click **"Add file"** → **"Create new file"**
+- Filename:
+```
+tests/test_transformations.py
